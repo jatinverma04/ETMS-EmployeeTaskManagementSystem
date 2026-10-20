@@ -11,6 +11,7 @@ const {
   buildEmployeeSort,
 } = require('../utils/employeeQuery');
 const { hasActiveTasksForEmployee } = require('./taskAssignment.service');
+const { runInTransaction } = require('./transaction.service');
 
 function validationError(field, message) {
   return new AppError('Validation failed.', 400, [{ field, message }]);
@@ -18,6 +19,16 @@ function validationError(field, message) {
 
 function employeeNotFoundError() {
   return new AppError('Employee not found.', 404);
+}
+
+function employeeHasActiveTasksError(
+  detail = 'Employee has active tasks assigned.',
+) {
+  return new AppError(
+    'Employee cannot be deleted while assigned Todo or In Progress tasks exist.',
+    409,
+    [{ field: 'id', message: detail }],
+  );
 }
 
 function assertValidEmployeeId(employeeId) {
@@ -228,23 +239,31 @@ async function updateEmployee(employeeId, body) {
 
 async function deleteEmployee(employeeId) {
   assertValidEmployeeId(employeeId);
-  const employee = await Employee.findById(employeeId);
 
-  if (!employee) {
-    throw employeeNotFoundError();
-  }
+  await runInTransaction(async (session) => {
+    const employee = await Employee.findById(employeeId).session(session);
 
-  const hasActiveTasks = await hasActiveTasksForEmployee(employee._id);
+    if (!employee) {
+      throw employeeNotFoundError();
+    }
 
-  if (hasActiveTasks) {
-    throw new AppError(
-      'Employee cannot be deleted while assigned Todo or In Progress tasks exist.',
-      409,
-      [{ field: 'id', message: 'Employee has active tasks assigned.' }],
+    if (await hasActiveTasksForEmployee(employee._id, { session })) {
+      throw employeeHasActiveTasksError();
+    }
+
+    // The counter guard and the transaction make the employee document the
+    // serialization point for concurrent task creation.
+    const deletedEmployee = await Employee.findOneAndDelete(
+      { _id: employee._id, activeTaskCount: 0 },
+      { session },
     );
-  }
 
-  await employee.deleteOne();
+    if (!deletedEmployee) {
+      throw employeeHasActiveTasksError(
+        'Employee active task count is not zero. Run capacity reconciliation before deleting.',
+      );
+    }
+  });
 }
 
 module.exports = {
