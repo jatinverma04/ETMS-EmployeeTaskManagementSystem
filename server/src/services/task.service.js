@@ -435,6 +435,35 @@ async function updateTask(taskId, body) {
   }
 }
 
+async function deleteTask(taskId) {
+  assertValidTaskId(taskId);
+
+  try {
+    await runInTransaction(async (session) => {
+      const taskDocument = await Task.findById(taskId).session(session);
+
+      if (!taskDocument) {
+        throw taskNotFoundError();
+      }
+
+      if (isActiveTaskStatus(taskDocument.status)) {
+        await decrementEmployeeCapacity(taskDocument.assignedEmployee, session);
+      }
+
+      const result = await Task.deleteOne(
+        { _id: taskDocument._id },
+        { session },
+      );
+
+      if (result.deletedCount !== 1) {
+        throw taskNotFoundError();
+      }
+    });
+  } catch (error) {
+    throw mapTaskWriteError(error);
+  }
+}
+
 async function updateTaskStatus(taskId, body) {
   assertValidTaskId(taskId);
   assertRequestBody(body);
@@ -499,4 +528,5 @@ module.exports = {
   getTask,
   updateTask,
   updateTaskStatus,
+  deleteTask,
 };

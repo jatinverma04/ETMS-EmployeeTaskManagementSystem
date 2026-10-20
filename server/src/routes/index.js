@@ -2,11 +2,13 @@ const express = require('express');
 const healthRoutes = require('./health.routes');
 const employeeRoutes = require('./employee.routes');
 const taskRoutes = require('./task.routes');
+const dashboardRoutes = require('./dashboard.routes');
 
 const router = express.Router();
 
 router.use('/health', healthRoutes);
 router.use('/employees', employeeRoutes);
 router.use('/tasks', taskRoutes);
+router.use('/dashboard', dashboardRoutes);
 
 module.exports = router;

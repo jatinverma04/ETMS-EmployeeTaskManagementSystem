@@ -4,7 +4,7 @@ const {
   TASK_STATUS_TRANSITIONS,
   TASK_PRIORITY_RANK,
 } = require('../constants/domain');
-const { compareDateOnly, isValidDate } = require('./dateOnly');
+const { isValidDate, toUtcDateOnly } = require('./dateOnly');
 
 function canTransitionTaskStatus(fromStatus, toStatus) {
   const allowedStatuses = TASK_STATUS_TRANSITIONS[fromStatus];
@@ -27,6 +27,33 @@ function getTaskPriorityRank(priority) {
   return TASK_PRIORITY_RANK[priority] || 0;
 }
 
+function getOverdueCutoff(now = new Date()) {
+  const currentDate = now instanceof Date ? now : new Date(now);
+
+  if (!isValidDate(currentDate)) {
+    return null;
+  }
+
+  return toUtcDateOnly(currentDate);
+}
+
+/**
+ * Database filter for active tasks whose Due Date is before today's UTC
+ * date-only boundary. Dashboard aggregation and isTaskOverdue share this rule.
+ */
+function buildOverdueTaskFilter(now = new Date()) {
+  const cutoff = getOverdueCutoff(now);
+
+  if (!cutoff) {
+    return null;
+  }
+
+  return {
+    status: { $in: ACTIVE_TASK_STATUSES },
+    dueDate: { $lt: cutoff },
+  };
+}
+
 /**
  * Compares UTC calendar days. A task due today is not overdue until the next UTC day.
  */
@@ -35,14 +62,14 @@ function isTaskOverdue({ dueDate, status, now = new Date() }) {
     return false;
   }
 
-  const currentDate = now instanceof Date ? now : new Date(now);
+  const cutoff = getOverdueCutoff(now);
+  const normalizedDueDate = toUtcDateOnly(dueDate);
 
-  if (!isValidDate(currentDate)) {
+  if (!cutoff || !isValidDate(normalizedDueDate)) {
     return false;
   }
 
-  const comparison = compareDateOnly(currentDate, dueDate);
-  return comparison !== null && comparison > 0;
+  return normalizedDueDate.getTime() < cutoff.getTime();
 }
 
 module.exports = {
@@ -51,5 +78,7 @@ module.exports = {
   isActiveTaskStatus,
   isTerminalTaskStatus,
   getTaskPriorityRank,
+  getOverdueCutoff,
+  buildOverdueTaskFilter,
   isTaskOverdue,
 };

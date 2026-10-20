@@ -3,6 +3,7 @@ const assert = require('node:assert/strict');
 const { TASK_STATUS, TASK_STATUSES } = require('../src/constants/domain');
 const { compareDateOnly, formatDateOnly, isValidDate, toUtcDateOnly } = require('../src/utils/dateOnly');
 const {
+  buildOverdueTaskFilter,
   canTransitionTaskStatus,
   getAllowedTaskStatusTransitions,
   getTaskPriorityRank,
@@ -135,6 +136,15 @@ describe('task workflow rules', () => {
       false,
     );
     assert.equal(isTaskOverdue({ dueDate: null, status: TASK_STATUS.TODO, now: new Date() }), false);
+  });
+
+  it('builds a database filter on the shared UTC overdue cutoff', () => {
+    const filter = buildOverdueTaskFilter(new Date('2024-06-16T12:00:00.000Z'));
+
+    assert.deepEqual(filter, {
+      status: { $in: [TASK_STATUS.TODO, TASK_STATUS.IN_PROGRESS] },
+      dueDate: { $lt: new Date('2024-06-16T00:00:00.000Z') },
+    });
   });
 });
 
