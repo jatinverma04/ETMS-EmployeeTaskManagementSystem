@@ -1,31 +1,37 @@
-export default function AppLayout({ children }) {
+import { useEffect } from 'react';
+import { Outlet, useLocation } from 'react-router-dom';
+import Header from '../components/layout/Header';
+
+function ScrollToTop() {
+  const location = useLocation();
+
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: 'auto' });
+  }, [location.pathname]);
+
+  return null;
+}
+
+export default function AppLayout() {
   return (
-    <div className="flex min-h-screen flex-col bg-canvas text-ink selection:bg-primary-soft selection:text-ink">
-      <header className="bg-header text-surface">
-        <div className="mx-auto flex max-w-6xl flex-col gap-4 px-4 py-6 sm:flex-row sm:items-center sm:justify-between sm:px-6 lg:px-8">
-          <div className="flex items-center gap-3">
-            <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-primary text-sm font-bold tracking-wider text-surface">
-              ET
-            </div>
-            <div>
-              <p className="text-xs font-semibold uppercase tracking-[0.22em] text-surface/70">ETMS</p>
-              <h1 className="text-lg font-semibold tracking-tight sm:text-xl">
-                Employee Task Management
-              </h1>
-            </div>
-          </div>
-          <span className="w-fit rounded-full border border-surface/20 bg-surface/10 px-3 py-1 text-xs font-medium tracking-wide text-surface">
-            Phase 1 foundation
-          </span>
-        </div>
-      </header>
-
-      <main className="mx-auto w-full max-w-6xl flex-1 px-4 py-10 sm:px-6 sm:py-14 lg:px-8">
-        {children}
+    <div className="flex min-h-screen flex-col bg-canvas text-ink">
+      <a
+        href="#main-content"
+        className="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-50 focus:rounded-lg focus:bg-surface focus:px-4 focus:py-3 focus:text-sm focus:font-semibold focus:text-primary focus:shadow-lg focus:outline-none focus:ring-2 focus:ring-focus focus:ring-offset-2 focus:ring-offset-canvas"
+      >
+        Skip to main content
+      </a>
+      <ScrollToTop />
+      <Header />
+      <main
+        id="main-content"
+        tabIndex={-1}
+        className="mx-auto w-full max-w-6xl flex-1 scroll-mt-20 px-4 py-8 focus:outline-none sm:px-6 sm:py-12 lg:px-8"
+      >
+        <Outlet />
       </main>
-
-      <footer className="mx-auto w-full max-w-6xl px-4 pb-10 text-sm text-ink-muted sm:px-6 lg:px-8">
-        React + Vite + Tailwind CSS · Express + MongoDB
+      <footer className="mx-auto w-full max-w-6xl px-4 pb-8 text-sm text-ink-muted sm:px-6 lg:px-8">
+        ETMS · React, Express, and MongoDB
       </footer>
     </div>
   );
