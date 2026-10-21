@@ -26,7 +26,7 @@ async function connectDatabase() {
     serverSelectionTimeoutMS: 10000,
   });
 
-  console.log(`MongoDB connected: ${mongoose.connection.host}/${mongoose.connection.name}`);
+  console.log(`MongoDB connected: database "${mongoose.connection.name}"`);
 }
 
 async function disconnectDatabase() {

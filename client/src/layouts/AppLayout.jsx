@@ -30,9 +30,6 @@ export default function AppLayout() {
       >
         <Outlet />
       </main>
-      <footer className="mx-auto w-full max-w-6xl px-4 pb-8 text-sm text-ink-muted sm:px-6 lg:px-8">
-        ETMS · React, Express, and MongoDB
-      </footer>
     </div>
   );
 }

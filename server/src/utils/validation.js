@@ -18,10 +18,6 @@ function normalizeSkills(value) {
   return [...new Set(normalized)];
 }
 
-function isValidEmail(value) {
-  return typeof value === 'string' && EMAIL_PATTERN.test(value);
-}
-
 function isValidPhone(value) {
   if (typeof value !== 'string') {
     return false;
@@ -50,7 +46,6 @@ module.exports = {
   normalizeEmployeeId,
   normalizeEmail,
   normalizeSkills,
-  isValidEmail,
   isValidPhone,
   isValidSkillsArray,
 };

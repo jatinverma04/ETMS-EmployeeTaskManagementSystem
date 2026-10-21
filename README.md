@@ -42,7 +42,7 @@ etms/
       middleware/         Validation and error handling
       models/             Employee, Task, Counter
       routes/             API routes
-      scripts/            Capacity reconciliation script
+      scripts/            Capacity reconciliation utility
       services/           Business logic
       utils/              Query, date, CSV, snapshot, and rule helpers
       validators/         Request validation
@@ -268,7 +268,7 @@ Employees are hard-deleted only when they have no Todo or In Progress tasks. Com
 
 ## Business Rules
 
-- Only `Active` employees can receive new task assignments.
+- `Active` employees are eligible for assignment, subject to the active-task capacity limit.
 - `Inactive` employees are always rejected.
 - `On Leave` employees are rejected when the task's start date falls within the inclusive leave range.
 - An employee can have at most three active tasks: `Todo` and `In Progress`.
