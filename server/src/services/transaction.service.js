@@ -81,6 +81,4 @@ async function runInTransaction(work) {
 
 module.exports = {
   runInTransaction,
-  isRetryableTransactionError,
-  isUnknownCommitResult,
 };

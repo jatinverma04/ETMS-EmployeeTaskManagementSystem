@@ -14,7 +14,7 @@ import TextArea from '../common/TextArea';
 import TextInput from '../common/TextInput';
 import { useToast } from '../common/ToastProvider';
 
-export const emptyTaskValues = Object.freeze({
+const emptyTaskValues = Object.freeze({
   title: '',
   description: '',
   assignedEmployee: '',
@@ -24,7 +24,7 @@ export const emptyTaskValues = Object.freeze({
   dueDate: '',
 });
 
-export function taskToFormValues(task) {
+function taskToFormValues(task) {
   return {
     title: task.title,
     description: task.description,

@@ -78,7 +78,6 @@ module.exports = {
   isActiveTaskStatus,
   isTerminalTaskStatus,
   getTaskPriorityRank,
-  getOverdueCutoff,
   buildOverdueTaskFilter,
   isTaskOverdue,
 };

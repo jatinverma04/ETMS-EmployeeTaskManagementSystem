@@ -32,7 +32,5 @@ function buildCsvRow(values) {
 }
 
 module.exports = {
-  protectCsvFormula,
-  escapeCsvValue,
   buildCsvRow,
 };

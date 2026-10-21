@@ -121,7 +121,6 @@ async function disconnectTestDatabase() {
 }
 
 module.exports = {
-  TEST_DATABASE_NAME,
   connectTestDatabase,
   clearTestCollections,
   disconnectTestDatabase,
